@@ -19,18 +19,18 @@
     text-align: center;
   }
   h1 {
-    font-size: 1.4rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
     color: #fff;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.2rem;
+    line-height: 1.2;
   }
   .sub {
-    font-size: 0.9rem;
-    color: rgba(255,255,255,0.45);
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.35);
     margin-bottom: 1.8rem;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
   }
   .wheel-wrap {
@@ -79,19 +79,12 @@
     color: #fff;
     letter-spacing: 0.02em;
   }
-  .stop-label {
-    margin-top: 0.5rem;
-    font-size: 0.8rem;
-    color: rgba(255,255,255,0.35);
-    letter-spacing: 0.06em;
-    min-height: 1.2rem;
-  }
 </style>
 </head>
 <body>
 
-<h1>Vrijgezellenrad</h1>
-<p class="sub">Kroegentocht Mitchell</p>
+<h1>Wat moet Mitchell drinken?</h1>
+<p class="sub">Kroegentocht Hasselt</p>
 
 <div class="wheel-wrap">
   <div class="pointer"></div>
@@ -100,7 +93,6 @@
 
 <button id="spinBtn" onclick="spin()">Draaien!</button>
 <div id="result"></div>
-<div id="stopLabel" class="stop-label"></div>
 
 <script>
 const segs = [
@@ -111,21 +103,6 @@ const segs = [
   { lines: ["Opdracht"],                       color: "#378ADD" },
   { lines: ["Speciaal biertje", "van de tap"], color: "#C2406A" },
 ];
-
-const stops = [
-  "Stop 1: Cambrinus",
-  "Stop 2: Café Van Veldeke",
-  "Stop 3: De Kleine Hal",
-  "Stop 4: The Irish Times Pub",
-  "Stop 5: Drugstore",
-  "Stop 6: The Hedgehog",
-  "Stop 7: Café René",
-  "Stop 8: Café Export",
-  "Stop 9: De Wijzen",
-  "Stop 10: VanGogh",
-];
-
-let stopIndex = 0;
 
 const n = segs.length;
 const canvas = document.getElementById('wheel');
@@ -207,16 +184,11 @@ function spin() {
       const w = winner(cur);
       const label = segs[w].lines.join(' ');
       document.getElementById('result').textContent = label + '!';
-      if (stopIndex < stops.length) {
-        document.getElementById('stopLabel').textContent = stops[stopIndex];
-        stopIndex++;
-      }
     }
   }
   requestAnimationFrame(frame);
 }
 
-document.getElementById('stopLabel').textContent = stops[0];
 draw(0);
 </script>
 </body>
