@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Vrijgezellenrad Mitchell</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #0f0f1a;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #fff;
+    margin-bottom: 0.25rem;
+  }
+  .sub {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 1.8rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .wheel-wrap {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1.8rem;
+  }
+  .pointer {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 13px solid transparent;
+    border-right: 13px solid transparent;
+    border-top: 26px solid #fff;
+    z-index: 10;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  }
+  canvas {
+    display: block;
+    border-radius: 50%;
+    box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  }
+  button {
+    background: #fff;
+    color: #0f0f1a;
+    border: none;
+    padding: 14px 48px;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.1s;
+  }
+  button:active { transform: scale(0.96); }
+  button:disabled { opacity: 0.4; cursor: default; }
+  #result {
+    margin-top: 1.2rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    min-height: 2rem;
+    color: #fff;
+    letter-spacing: 0.02em;
+  }
+  .stop-label {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.06em;
+    min-height: 1.2rem;
+  }
+</style>
+</head>
+<body>
+
+<h1>Vrijgezellenrad</h1>
+<p class="sub">Kroegentocht Mitchell</p>
+
+<div class="wheel-wrap">
+  <div class="pointer"></div>
+  <canvas id="wheel" width="310" height="310"></canvas>
+</div>
+
+<button id="spinBtn" onclick="spin()">Draaien!</button>
+<div id="result"></div>
+<div id="stopLabel" class="stop-label"></div>
+
+<script>
+const segs = [
+  { lines: ["De groep", "kiest"],             color: "#D85A30" },
+  { lines: ["Mitchell", "kiest"],              color: "#1D9E75" },
+  { lines: ["Random iemand", "kiest"],         color: "#BA7517" },
+  { lines: ["De barman", "kiest"],             color: "#7F77DD" },
+  { lines: ["Opdracht"],                       color: "#378ADD" },
+  { lines: ["Speciaal biertje", "van de tap"], color: "#C2406A" },
+];
+
+const stops = [
+  "Stop 1: Cambrinus",
+  "Stop 2: Café Van Veldeke",
+  "Stop 3: De Kleine Hal",
+  "Stop 4: The Irish Times Pub",
+  "Stop 5: Drugstore",
+  "Stop 6: The Hedgehog",
+  "Stop 7: Café René",
+  "Stop 8: Café Export",
+  "Stop 9: De Wijzen",
+  "Stop 10: VanGogh",
+];
+
+let stopIndex = 0;
+
+const n = segs.length;
+const canvas = document.getElementById('wheel');
+const ctx = canvas.getContext('2d');
+const cx = 155, cy = 155, R = 148;
+let cur = 0, spinning = false;
+
+function draw(angle) {
+  ctx.clearRect(0, 0, 310, 310);
+  const step = (2 * Math.PI) / n;
+  for (let i = 0; i < n; i++) {
+    const s = angle - Math.PI / 2 + i * step;
+    const e = s + step;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, R, s, e);
+    ctx.closePath();
+    ctx.fillStyle = segs[i].color;
+    ctx.fill();
+    ctx.strokeStyle = '#0f0f1a';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(s + step / 2);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#fff';
+    ctx.font = '600 12px -apple-system, BlinkMacSystemFont, sans-serif';
+    const lines = segs[i].lines;
+    if (lines.length === 1) {
+      ctx.fillText(lines[0], R - 12, 4);
+    } else {
+      ctx.fillText(lines[0], R - 12, -4);
+      ctx.fillText(lines[1], R - 12, 10);
+    }
+    ctx.restore();
+  }
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, 18, 0, 2 * Math.PI);
+  ctx.fillStyle = '#0f0f1a';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+}
+
+function winner(angle) {
+  const step = (2 * Math.PI) / n;
+  const norm = ((-angle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+  return Math.floor(norm / step) % n;
+}
+
+function spin() {
+  if (spinning) return;
+  spinning = true;
+  document.getElementById('result').textContent = '';
+  document.getElementById('spinBtn').disabled = true;
+
+  const extra = (6 + Math.floor(Math.random() * 4)) * 2 * Math.PI;
+  const rand = Math.random() * 2 * Math.PI;
+  const target = cur + extra + rand;
+  const dur = 4200;
+  const start = cur;
+  const t0 = performance.now();
+
+  function frame(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 4);
+    cur = start + (target - start) * ease;
+    draw(cur);
+    if (p < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      cur = target;
+      spinning = false;
+      document.getElementById('spinBtn').disabled = false;
+      const w = winner(cur);
+      const label = segs[w].lines.join(' ');
+      document.getElementById('result').textContent = label + '!';
+      if (stopIndex < stops.length) {
+        document.getElementById('stopLabel').textContent = stops[stopIndex];
+        stopIndex++;
+      }
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+document.getElementById('stopLabel').textContent = stops[0];
+draw(0);
+</script>
+</body>
+</html>
